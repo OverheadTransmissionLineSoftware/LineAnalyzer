@@ -1,0 +1,51 @@
+# compiled source #
+###################
+*.a
+*.d
+*.dll
+*.lib
+*.o
+*.obj
+*.so
+
+# Code::Blocks temp files #
+###########################
+*.depend
+*.layout
+
+# Visual Studio temp files #
+############################
+*.db
+*.db-shm
+*.db-wal
+*.idb
+*.ilk
+*.iobj
+*.ipdb
+*.lastbuildstate
+*.opendb
+*.pdb
+*.res
+*.suo
+*.tlog
+
+# doxygen generated files #
+###########################
+*.aux
+*.css
+*.dvi
+*.html
+*.js
+*.log
+*.png
+*.tex
+
+# generated resources #
+#######################
+res/resources.cc
+
+# generated executables #
+######################################
+*.exe
+build/codeblocks/debug/LineAnalyzer
+build/codeblocks/release/LineAnalyzer
