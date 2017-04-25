@@ -50,6 +50,7 @@ bool DocumentFileDropTarget::OnDropFiles(wxCoord x, wxCoord y,
 BEGIN_EVENT_TABLE(LineAnalyzerFrame, wxDocParentFrame)
   EVT_MENU(XRCID("menuitem_file_preferences"), LineAnalyzerFrame::OnMenuFilePreferences)
   EVT_MENU(XRCID("menuitem_help_about"), LineAnalyzerFrame::OnMenuHelpAbout)
+  EVT_MENU(XRCID("menuitem_view_log"), LineAnalyzerFrame::OnMenuViewLog)
 END_EVENT_TABLE()
 
 LineAnalyzerFrame::LineAnalyzerFrame(wxDocManager* manager)
