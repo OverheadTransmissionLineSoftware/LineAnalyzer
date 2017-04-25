@@ -67,7 +67,7 @@ int LineAnalyzerApp::OnExit() {
   wxLog::EnableLogging(false);
 
   // saves config file
-  FileHandler::SaveConfigFile(filepath_config_, config_);
+  FileHandler::SaveConfig(filepath_config_, config_);
 
   // cleans up allocated resources
   delete manager_doc_;
@@ -119,7 +119,7 @@ bool LineAnalyzerApp::OnInit() {
   // filehandler handles all logging
   wxFileName path;
   path = filepath_config_;
-  FileHandler::LoadConfigFile(filepath_config_, config_);
+  FileHandler::LoadConfig(filepath_config_, config_);
 
   // sets log level specified in app config
   wxLog::SetLogLevel(config_.level_log);
