@@ -5,6 +5,7 @@
 
 #include "appcommon/xml/transmission_line_xml_handler.h"
 #include "appcommon/xml/weather_load_case_xml_handler.h"
+#include "wx/filename.h"
 
 #include "file_handler.h"
 
@@ -15,6 +16,11 @@ wxXmlNode* LineAnalyzerDocXmlHandler::CreateNode(
   wxXmlNode* node_root = nullptr;
   wxXmlNode* node_element = nullptr;
   std::string title;
+
+  // gets document directory
+  wxFileName filename_doc(doc.GetFilename());
+  filename_doc.MakeAbsolute(wxEmptyString, wxPATH_NATIVE);
+  wxString dirname_doc = filename_doc.GetPath();
 
   // creates a node for the root
   node_root = new wxXmlNode(wxXML_ELEMENT_NODE, "line_analyzer_doc");
@@ -27,8 +33,14 @@ wxXmlNode* LineAnalyzerDocXmlHandler::CreateNode(
   for (auto iter = doc.structures().cbegin(); iter != doc.structures().cend();
        iter++) {
     const StructureFile& structurefile = *iter;
+
+    // converts absolute path to a relative unix-style path
+    wxFileName filename(structurefile.filepath);
+    filename.MakeRelativeTo(dirname_doc);
+    std::string filepath_relative = filename.GetFullPath(wxPATH_UNIX);
+
     wxXmlNode* sub_node = CreateElementNodeWithContent("file",
-                                                       structurefile.filepath);
+                                                       filepath_relative);
     node_element->AddChild(sub_node);
   }
 
@@ -41,8 +53,14 @@ wxXmlNode* LineAnalyzerDocXmlHandler::CreateNode(
   for (auto iter = doc.hardwares().cbegin(); iter != doc.hardwares().cend();
        iter++) {
     const HardwareFile& hardwarefile = *iter;
+
+    // converts absolute path to a relative unix-style path
+    wxFileName filename(hardwarefile.filepath);
+    filename.MakeRelativeTo(dirname_doc);
+    std::string filepath_relative = filename.GetFullPath(wxPATH_UNIX);
+
     wxXmlNode* sub_node = CreateElementNodeWithContent("file",
-                                                       hardwarefile.filepath);
+                                                       filepath_relative);
     node_element->AddChild(sub_node);
   }
 
@@ -55,8 +73,14 @@ wxXmlNode* LineAnalyzerDocXmlHandler::CreateNode(
   for (auto iter = doc.cables().cbegin(); iter != doc.cables().cend();
        iter++) {
     const CableFile& cablefile = *iter;
+
+    // converts absolute path to a relative unix-style path
+    wxFileName filename(cablefile.filepath);
+    filename.MakeRelativeTo(dirname_doc);
+    std::string filepath_relative = filename.GetFullPath(wxPATH_UNIX);
+
     wxXmlNode* sub_node = CreateElementNodeWithContent("file",
-                                                       cablefile.filepath);
+                                                       filepath_relative);
     node_element->AddChild(sub_node);
   }
 
@@ -136,6 +160,11 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
   bool status = true;
   wxString message;
 
+  // gets document directory
+  wxFileName filename_doc(doc.GetFilename());
+  filename_doc.MakeAbsolute(wxEmptyString, wxPATH_NATIVE);
+  wxString dirname_doc = filename_doc.GetPath();
+
   // evaluates each child node
   const wxXmlNode* node = root->GetChildren();
   while (node != nullptr) {
@@ -148,13 +177,17 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
 
       int index = 0;
       while (sub_node != nullptr) {
-        StructureFile structurefile;
-
-        // gets filepath
-        structurefile.filepath = ParseElementNodeWithContent(sub_node);
+        // gets filepath and converts to absolute if needed
+        wxString filepath_node = ParseElementNodeWithContent(sub_node);
+        wxFileName filename(filepath_node);
+        if (filename.IsAbsolute() == false) {
+          filename.MakeAbsolute(dirname_doc, wxPATH_NATIVE);
+        }
 
         // loads structure file
         // filehandler function handles all logging
+        StructureFile structurefile;
+        structurefile.filepath = filename.GetFullPath();
         const int status_node = FileHandler::LoadStructure(
             structurefile.filepath,
             units,
@@ -179,13 +212,17 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
 
       int index = 0;
       while (sub_node != nullptr) {
-        HardwareFile hardwarefile;
-
-        // gets filepath
-        hardwarefile.filepath = ParseElementNodeWithContent(sub_node);
+        // gets filepath and converts to absolute if needed
+        wxString filepath_node = ParseElementNodeWithContent(sub_node);
+        wxFileName filename(filepath_node);
+        if (filename.IsAbsolute() == false) {
+          filename.MakeAbsolute(dirname_doc, wxPATH_NATIVE);
+        }
 
         // loads hardware file
         // filehandler function handles all logging
+        HardwareFile hardwarefile;
+        hardwarefile.filepath = filename.GetFullPath();
         const int status_node = FileHandler::LoadHardware(
             hardwarefile.filepath,
             units,
@@ -210,13 +247,17 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
 
       int index = 0;
       while (sub_node != nullptr) {
-        CableFile cablefile;
-
-        // gets filepath
-        cablefile.filepath = ParseElementNodeWithContent(sub_node);
+        // gets filepath and converts to absolute if needed
+        wxString filepath_node = ParseElementNodeWithContent(sub_node);
+        wxFileName filename(filepath_node);
+        if (filename.IsAbsolute() == false) {
+          filename.MakeAbsolute(dirname_doc, wxPATH_NATIVE);
+        }
 
         // loads cable file
         // filehandler function handles all logging
+        CableFile cablefile;
+        cablefile.filepath = filename.GetFullPath();
         const int status_node = FileHandler::LoadCable(cablefile.filepath,
                                                        units,
                                                        cablefile.cable);

@@ -50,7 +50,7 @@ struct CableFile {
   Cable cable;
 
   /// \var filepath
-  ///   The file path.
+  ///   The absolute file path.
   std::string filepath;
 };
 
@@ -64,7 +64,7 @@ struct HardwareFile {
   Hardware hardware;
 
   /// \var filepath
-  ///   The file path.
+  ///   The absolute file path.
   std::string filepath;
 };
 
@@ -73,7 +73,7 @@ struct HardwareFile {
 /// This struct pairs a structure iwth an external file.
 struct StructureFile {
   /// \var filepath
-  ///   The file path.
+  ///   The absolute file path.
   std::string filepath;
 
   /// \var structure
