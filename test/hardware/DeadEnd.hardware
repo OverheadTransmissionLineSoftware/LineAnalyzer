@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hardware version="1" units="Imperial">
+  <name>DeadEnd-25000-10</name>
+  <type>DeadEnd</type>
+  <area_cross_section units="ft^2">10</area_cross_section>
+  <length units="ft">10</length>
+  <weight units="lbs">200</weight>
+</hardware>

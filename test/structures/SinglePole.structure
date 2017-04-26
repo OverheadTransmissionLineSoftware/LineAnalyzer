@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<structure version="1" units="Imperial">
+  <name>SinglePole</name>
+  <height units="ft">100</height>
+  <attachments>
+    <structure_attachment version="1">
+      <offset_longitudinal units="ft">-1.00</offset_longitudinal>
+      <offset_transverse units="ft">0.00</offset_transverse>
+      <offset_vertical_top units="ft">0.00</offset_vertical_top>
+    </structure_attachment>
+    <structure_attachment version="1">
+      <offset_longitudinal units="ft">0.00</offset_longitudinal>
+      <offset_transverse units="ft">0.00</offset_transverse>
+      <offset_vertical_top units="ft">0.00</offset_vertical_top>
+    </structure_attachment>
+    <structure_attachment version="1">
+      <offset_longitudinal units="ft">1.00</offset_longitudinal>
+      <offset_transverse units="ft">0.00</offset_transverse>
+      <offset_vertical_top units="ft">0.00</offset_vertical_top>
+    </structure_attachment>
+  </attachments>
+</structure>
