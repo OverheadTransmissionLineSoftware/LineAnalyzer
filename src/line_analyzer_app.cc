@@ -48,15 +48,20 @@ bool LineAnalyzerApp::OnCmdLineParsed(wxCmdLineParser& parser) {
 
     // detects OS and specifies default config file path for user
     wxOperatingSystemId os = wxGetOsVersion();
-    if (os == wxOS_WINDOWS_NT) {
+    if ((wxOS_UNKNOWN < os) && (os <= wxOS_MAC)) {
+      // mac os
+      path.SetPath(wxStandardPaths::Get().GetExecutablePath());
+    } else if ((wxOS_MAC < os) && (os <= wxOS_WINDOWS)) {
+      // windows os
       path.SetPath(wxStandardPaths::Get().GetUserConfigDir());
       path.AppendDir("OTLS");
       path.AppendDir("LineAnalyzer");
-    } else if (os == wxOS_UNIX_LINUX) {
+    } else if ((wxOS_WINDOWS < os) && (os <= wxOS_UNIX)) {
+      // unix os
       path.SetPath(wxStandardPaths::Get().GetUserConfigDir());
       path.AppendDir(".config");
-      path.AppendDir("OTLS");
-      path.AppendDir("LineAnalyzer");
+      path.AppendDir("otls");
+      path.AppendDir("line-analyzer");
     } else {
       path.SetPath(wxStandardPaths::Get().GetExecutablePath());
     }
