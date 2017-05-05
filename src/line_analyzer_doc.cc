@@ -22,6 +22,7 @@ IMPLEMENT_DYNAMIC_CLASS(LineAnalyzerDoc, wxDocument)
 LineAnalyzerDoc::LineAnalyzerDoc() {
   lines_.push_back(TransmissionLine());
   index_active_ = 0;
+  line_active_ = &(*lines_.begin());
 }
 
 LineAnalyzerDoc::~LineAnalyzerDoc() {
@@ -595,6 +596,7 @@ wxInputStream& LineAnalyzerDoc::LoadObject(wxInputStream& stream) {
 
   // sets active transmission line
   index_active_ = 0;
+  UpdateActiveLineReference();
 
   // resets modified status to false because the xml parser uses functions
   // that mark it as modified
@@ -796,9 +798,14 @@ const std::list<TransmissionLine>& LineAnalyzerDoc::lines() const {
   return lines_;
 }
 
+const TransmissionLine& LineAnalyzerDoc::line() const {
+  return *line_active_;
+}
+
 bool LineAnalyzerDoc::set_index_active(const int& index) {
   if (IsValidIndex(index, lines_.size(), false) == true) {
     index_active_ = index;
+    UpdateActiveLineReference();
     return true;
   } else {
     return false;
@@ -843,4 +850,8 @@ bool LineAnalyzerDoc::IsValidIndex(const int& index,
   } else {
     return false;
   }
+}
+
+void LineAnalyzerDoc::UpdateActiveLineReference() {
+  line_active_ = &(*std::next(lines_.begin(), index_active_));
 }

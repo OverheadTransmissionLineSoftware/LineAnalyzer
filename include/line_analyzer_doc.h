@@ -343,6 +343,10 @@ class LineAnalyzerDoc : public wxDocument {
   /// \return The active transmission line index
   int index_active() const;
 
+  /// \brief Gets the active transmission line.
+  /// \return The active transmission line.
+  const TransmissionLine& line() const;
+
   /// \brief Gets the transmission lines.
   /// \return The transmission lines.
   const std::list<TransmissionLine>& lines() const;
@@ -383,6 +387,11 @@ class LineAnalyzerDoc : public wxDocument {
   bool IsValidIndex(const int& index, const int& size,
                     const bool& is_included_end) const;
 
+  /// Updates active transmission line.
+  /// \param[in] index
+  ///   The index.
+  void UpdateActiveLineReference();
+
   /// \var cables_
   ///   The cable files.
   std::list<CableFile> cables_;
@@ -394,6 +403,10 @@ class LineAnalyzerDoc : public wxDocument {
   /// \var index_active_
   ///   The index of the active transmission line.
   int index_active_;
+
+  /// \var line_active_
+  ///   A reference to the active transmission line.
+  TransmissionLine* line_active_;
 
   /// \var lines_
   ///   The transmission lines.
