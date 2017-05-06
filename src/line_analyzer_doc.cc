@@ -540,6 +540,12 @@ bool LineAnalyzerDoc::LoadTransmissionLinesFromXml(const wxXmlNode* node) {
   return status;
 }
 
+bool LineAnalyzerDoc::ModifyTransmissionLine(const TransmissionLine& line) {
+  *line_active_ = line;
+
+  return true;
+}
+
 bool LineAnalyzerDoc::MoveTransmissionLine(const int& index_from,
                                            const int& index_to) {
   // checks indexes

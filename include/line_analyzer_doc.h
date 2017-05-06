@@ -232,6 +232,12 @@ class LineAnalyzerDoc : public wxDocument {
   /// \return Success status.
   bool LoadTransmissionLinesFromXml(const wxXmlNode* node);
 
+  /// \brief Modifies the active transmission line.
+  /// \param[in] line
+  ///   The transmission line.
+  /// \return Success status.
+  bool ModifyTransmissionLine(const TransmissionLine& line);
+
   /// \brief Moves the transmission line within the list.
   /// \param[in] index_from
   ///   The index item to move.
