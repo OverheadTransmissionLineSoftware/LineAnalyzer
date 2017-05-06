@@ -104,12 +104,9 @@ struct StructureFile {
 /// transmission lines. This data is available for reference to all transmission
 /// lines in the document.
 ///
-/// Some of shared data may originate from external files. This document loads
-/// the data from the external files when the document is loaded. When the data
-/// that originates in an external file is modified, it is immediately saved.
-/// When data that originates from the document is modified, it is saved when
-/// the rest of the document is. Document file saves will not overwrite external
-/// files.
+/// Some of shared data may originate from external files. The external file are
+/// treated as read-only for this document. Document file saves will not overwrite
+/// external files.
 ///
 /// Each item in the shared data sets must be unique in some way. This allows
 /// the references to be re-established when the document is saved and loaded
@@ -173,68 +170,11 @@ class LineAnalyzerDoc : public wxDocument {
   void ConvertUnitSystem(const units::UnitSystem& system_from,
                          const units::UnitSystem& system_to);
 
-  /// \brief Deletes a cable file.
-  /// \param[in] index
-  ///   The list index.
-  /// \return Success status.
-  /// Cable files can't be removed from the document if referenced by a
-  /// transmission line.
-  bool DeleteCableFile(const int& index);
-
-  /// \brief Deletes a hardware file.
-  /// \param[in] index
-  ///   The list index.
-  /// \return Success status.
-  /// Hardware files can't be removed from the document if referenced by a
-  /// transmission line.
-  bool DeleteHardwareFile(const int& index);
-
-  /// \brief Deletes a structure file.
-  /// \param[in] index
-  ///   The list index.
-  /// \return Success status.
-  /// Structure files can't be removed from the document if referenced by a
-  /// transmission line.
-  bool DeleteStructureFile(const int& index);
-
   /// \brief Deletes a transmission line.
   /// \param[in] index
   ///   The list index.
   /// \return Success status.
   bool DeleteTransmissionLine(const int& index);
-
-  /// \brief Deletes a weather case.
-  /// \param[in] index
-  ///   The list index.
-  /// \return Success status.
-  /// Weather cases can't be removed from the document if referenced by a
-  /// transmission line.
-  bool DeleteWeatherCase(const int& index);
-
-  /// \brief Inserts a cable file.
-  /// \param[in] index
-  ///   The list index to insert before.
-  /// \param[in] cablefile
-  ///   The the cable file.
-  /// \return Success status.
-  bool InsertCableFile(const int& index, const CableFile& cablefile);
-
-  /// \brief Inserts a transmission line.
-  /// \param[in] index
-  ///   The list index to insert before.
-  /// \param[in] hardwarefile
-  ///   The hardware file.
-  /// \return Success status.
-  bool InsertHardwareFile(const int& index, const HardwareFile& hardwarefile);
-
-  /// \brief Inserts a structure file.
-  /// \param[in] index
-  ///   The list index to insert before.
-  /// \param[in] structurefile
-  ///   The structure file.
-  /// \return Success status.
-  bool InsertStructureFile(const int& index,
-                           const StructureFile& structurefile);
 
   /// \brief Inserts a transmission line.
   /// \param[in] index
@@ -243,14 +183,6 @@ class LineAnalyzerDoc : public wxDocument {
   ///   The transmission line.
   /// \return Success status.
   bool InsertTransmissionLine(const int& index, const TransmissionLine& line);
-
-  /// \brief Inserts a weather case.
-  /// \param[in] index
-  ///   The list index to insert before.
-  /// \param[in] weathercase
-  ///   The weathercase.
-  /// \return Success status.
-  bool InsertWeatherCase(const int& index, const WeatherLoadCase& weathercase);
 
   /// \brief Determines if the cable file is referenced.
   /// \param[in] index
@@ -299,42 +231,6 @@ class LineAnalyzerDoc : public wxDocument {
   /// document.
   /// \return Success status.
   bool LoadTransmissionLinesFromXml(const wxXmlNode* node);
-
-  /// \brief Modifies a cable file.
-  /// \param[in] index
-  ///   The list index.
-  /// \param[in] cablefile
-  ///   The cable file.
-  /// \return Success status.
-  /// The external file will be overwritten with the new data.
-  bool ModifyCableFile(const int& index, const CableFile& cablefile);
-
-  /// \brief Modifies a hardware file.
-  /// \param[in] index
-  ///   The list index.
-  /// \param[in] hardwarefile
-  ///   The hardware file.
-  /// \return Success status.
-  /// The external file will be overwritten with the new data.
-  bool ModifyHardwareFile(const int& index, const HardwareFile& hardwarefile);
-
-  /// \brief Modifies a structure file.
-  /// \param[in] index
-  ///   The list index.
-  /// \param[in] structurefile
-  ///   The structure file.
-  /// \return Success status.
-  /// The external file will be overwritten with the new data.
-  bool ModifyStructureFile(const int& index,
-                           const StructureFile& structurefile);
-
-  /// \brief Modifies a weathercase.
-  /// \param[in] index
-  ///   The list index.
-  /// \param[in] weathercase
-  ///   The weathercase.
-  /// \return Success status.
-  bool ModifyWeatherCase(const int& index, const WeatherLoadCase& weathercase);
 
   /// \brief Moves the transmission line within the list.
   /// \param[in] index_from
@@ -389,11 +285,35 @@ class LineAnalyzerDoc : public wxDocument {
   /// \return The transmission lines.
   const std::list<TransmissionLine>& lines() const;
 
+  /// \brief Sets the cable files.
+  /// \param[in] cablefiles
+  ///   The cable files.
+  /// \return Success status.
+  bool set_cables(const std::list<CableFile>& cablefiles);
+
+  /// \brief Sets the hardware files.
+  /// \param[in] hardwarefiles
+  ///   The hardware files.
+  /// \return Success status.
+  bool set_hardwares(const std::list<HardwareFile>& hardwarefiles);
+
   /// \brief Sets the active transmission line.
   /// \param[in] index
   ///   The list index.
   /// \return Success status.
   bool set_index_active(const int& index);
+
+  /// \brief Sets the structure files.
+  /// \param[in] structurefiles
+  ///   The structure files.
+  /// \return Success status.
+  bool set_structures(const std::list<StructureFile>& structurefiles);
+
+  /// \brief Sets the weathercases.
+  /// \param[in] weathercases
+  ///   The weather cases.
+  /// \return Success status.
+  bool set_weathercases(const std::list<WeatherLoadCase>& weathercases);
 
   /// \brief Gets the structure files.
   /// \return The structure files.

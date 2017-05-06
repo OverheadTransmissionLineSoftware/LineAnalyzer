@@ -12,7 +12,6 @@
 #include "appcommon/xml/transmission_line_xml_handler.h"
 #include "wx/cmdproc.h"
 #include "wx/wx.h"
-#include "wx/xml/xml.h"
 
 #include "file_handler.h"
 #include "line_analyzer_app.h"
@@ -118,69 +117,6 @@ void LineAnalyzerDoc::ConvertUnitSystem(const units::UnitSystem& system_from,
   }
 }
 
-bool LineAnalyzerDoc::DeleteCableFile(const int& index) {
-  // checks index
-  if (IsValidIndex(index, cables_.size(), false) == false) {
-    return false;
-  }
-
-  // checks for reference in transmission lines
-  if (IsReferencedCableFile(index) == true) {
-    return false;
-  }
-
-  // gets iterator with edit capability and deletes
-  auto iter = std::next(cables_.begin(), index);
-  cables_.erase(iter);
-
-  // marks as modified
-  Modify(true);
-
-  return true;
-}
-
-bool LineAnalyzerDoc::DeleteHardwareFile(const int& index) {
-  // checks index
-  if (IsValidIndex(index, hardwares_.size(), false) == false) {
-    return false;
-  }
-
-  // checks for reference in transmission lines
-  if (IsReferencedHardwareFile(index) == true) {
-    return false;
-  }
-
-  // gets iterator with edit capability and deletes
-  auto iter = std::next(hardwares_.begin(), index);
-  hardwares_.erase(iter);
-
-  // marks as modified
-  Modify(true);
-
-  return true;
-}
-
-bool LineAnalyzerDoc::DeleteStructureFile(const int& index) {
-  // checks index
-  if (IsValidIndex(index, structures_.size(), false) == false) {
-    return false;
-  }
-
-  // checks for reference in transmission lines
-  if (IsReferencedStructureFile(index) == true) {
-    return false;
-  }
-
-  // gets iterator with edit capability and deletes
-  auto iter = std::next(structures_.begin(), index);
-  structures_.erase(iter);
-
-  // marks as modified
-  Modify(true);
-
-  return true;
-}
-
 bool LineAnalyzerDoc::DeleteTransmissionLine(const int& index) {
   // checks index
   if (IsValidIndex(index, lines_.size(), false) == false) {
@@ -200,104 +136,7 @@ bool LineAnalyzerDoc::DeleteTransmissionLine(const int& index) {
     index_active_ = 0;
   }
 
-  // marks as modified
-  Modify(true);
-
-  return true;
-}
-
-bool LineAnalyzerDoc::DeleteWeatherCase(const int& index) {
-  // checks index
-  if (IsValidIndex(index, weathercases_.size(), false) == false) {
-    return false;
-  }
-
-  // checks for reference in transmission lines
-  if (IsReferencedWeatherCase(index) == true) {
-    return false;
-  }
-
-  // gets iterator with edit capability and deletes
-  auto iter = std::next(weathercases_.begin(), index);
-  weathercases_.erase(iter);
-
-  // marks as modified
-  Modify(true);
-
-  return true;
-}
-
-bool LineAnalyzerDoc::InsertCableFile(const int& index,
-                                      const CableFile& cablefile) {
-  // checks index
-  if (IsValidIndex(index, cables_.size(), true) == false) {
-    return false;
-  }
-
-  // checks to see if cable file path is already in list
-  for (auto iter = cables_.cbegin(); iter != cables_.cend(); iter++) {
-    const CableFile& cablefile_list = *iter;
-    if (cablefile_list.filepath == cablefile.filepath) {
-      // duplicate filepath is found
-      return false;
-    }
-  }
-
-  // gets iterator with edit capability and inserts
-  auto iter = std::next(cables_.begin(), index);
-  cables_.insert(iter, cablefile);
-
-  // marks as modified
-  Modify(true);
-
-  return true;
-}
-
-bool LineAnalyzerDoc::InsertHardwareFile(const int& index,
-                                         const HardwareFile& hardwarefile) {
-  // checks index
-  if (IsValidIndex(index, hardwares_.size(), true) == false) {
-    return false;
-  }
-
-  // checks to see if hardware file path is already in list
-  for (auto iter = hardwares_.cbegin(); iter != hardwares_.cend(); iter++) {
-    const HardwareFile& hardwarefile_list = *iter;
-    if (hardwarefile_list.filepath == hardwarefile.filepath) {
-      // duplicate filepath is found
-      return false;
-    }
-  }
-
-  // gets iterator with edit capability and inserts
-  auto iter = std::next(hardwares_.begin(), index);
-  hardwares_.insert(iter, hardwarefile);
-
-  // marks as modified
-  Modify(true);
-
-  return true;
-}
-
-bool LineAnalyzerDoc::InsertStructureFile(const int& index,
-                                          const StructureFile& structurefile) {
-  // checks index
-  if (IsValidIndex(index, hardwares_.size(), true) == false) {
-    return false;
-  }
-
-  // checks to see if structure file path is already in list
-  for (auto iter = structures_.cbegin(); iter != structures_.cend(); iter++) {
-    const StructureFile& structurefile_list = *iter;
-    if (structurefile_list.filepath == structurefile.filepath) {
-      // duplicate filepath is found
-      return false;
-    }
-  }
-
-  // gets iterator with edit capability and inserts
-  auto iter = std::next(structures_.begin(), index);
-  structures_.insert(iter, structurefile);
+  UpdateActiveLineReference();
 
   // marks as modified
   Modify(true);
@@ -315,28 +154,6 @@ bool LineAnalyzerDoc::InsertTransmissionLine(const int& index,
   // gets iterator with edit capability and inserts
   auto iter = std::next(lines_.begin(), index);
   lines_.insert(iter, line);
-
-  // marks as modified
-  Modify(true);
-
-  return true;
-}
-
-bool LineAnalyzerDoc::InsertWeatherCase(const int& index,
-                                        const WeatherLoadCase& weathercase) {
-  // checks index
-  if (IsValidIndex(index, weathercases_.size(), true) == false) {
-    return false;
-  }
-
-  // checks for unique name
-  if (IsUniqueWeathercaseName(weathercase.description, index) == false) {
-    return false;
-  }
-
-  // gets iterator with edit capability and inserts
-  auto iter = std::next(weathercases_.begin(), index);
-  weathercases_.insert(iter, weathercase);
 
   // marks as modified
   Modify(true);
@@ -723,106 +540,6 @@ bool LineAnalyzerDoc::LoadTransmissionLinesFromXml(const wxXmlNode* node) {
   return status;
 }
 
-bool LineAnalyzerDoc::ModifyCableFile(const int& index,
-                                      const CableFile& cablefile) {
-  // checks index
-  if (IsValidIndex(index, cables_.size(), false) == false) {
-    return false;
-  }
-
-  // gets an iterator with edit capability and modifies
-  auto iter = std::next(cables_.begin(), index);
-  *iter = cablefile;
-
-  // updates external file
-  FileHandler::SaveCable(cablefile.filepath, cablefile.cable,
-                          wxGetApp().config()->units);
-
-  return true;
-}
-
-bool LineAnalyzerDoc::ModifyHardwareFile(const int& index,
-                                         const HardwareFile& hardwarefile) {
-  // checks index
-  if (IsValidIndex(index, hardwares_.size(), false) == false) {
-    return false;
-  }
-
-  // gets an iterator with edit capability and modifies
-  auto iter = std::next(hardwares_.begin(), index);
-  *iter = hardwarefile;
-
-  // updates external file
-  FileHandler::SaveHardware(hardwarefile.filepath, hardwarefile.hardware,
-                            wxGetApp().config()->units);
-
-  return true;
-}
-
-bool LineAnalyzerDoc::ModifyStructureFile(const int& index,
-                                          const StructureFile& structurefile) {
-  // checks index
-  if (IsValidIndex(index, hardwares_.size(), false) == false) {
-    return false;
-  }
-
-  // gets an iterator with edit capability and modifies
-  auto iter = std::next(structures_.begin(), index);
-  *iter = structurefile;
-
-  // searches all transmission lines for affected structures
-  const Structure* structure = &(*iter).structure;
-  for (auto iter = lines_.begin(); iter != lines_.end(); iter++) {
-    TransmissionLine& line = *iter;
-
-    // searches all line structures
-    int index = 0;
-    for (auto it = line.line_structures()->cbegin();
-         it != line.line_structures()->cend(); it++) {
-      const LineStructure& line_structure = *it;
-
-      // the line structure isn't modified, but this will trigger the
-      // transmission line to clean up connections if needed
-      if (line_structure.structure() == structure) {
-        LineStructure line_structure_mod = line_structure;
-        line.ModifyLineStructure(index, line_structure_mod);
-      }
-
-      index++;
-    }
-
-  }
-
-  /// \todo Need to figure out how to implement this change
-  ///  if attachment change with the modified structure, it could break all
-  ///  of the line structure hardware and line cables that are attached
-
-  // updates external file
-  FileHandler::SaveStructure(structurefile.filepath, structurefile.structure,
-                              wxGetApp().config()->units);
-
-  return true;
-}
-
-bool LineAnalyzerDoc::ModifyWeatherCase(const int& index,
-                                        const WeatherLoadCase& weathercase) {
-  // checks index
-  if (IsValidIndex(index, hardwares_.size(), false) == false) {
-    return false;
-  }
-
-  // checks for unique name
-  if (IsUniqueWeathercaseName(weathercase.description, index) == false) {
-    return false;
-  }
-
-  // gets an iterator with edit capability and modifies
-  auto iter = std::next(weathercases_.begin(), index);
-  *iter = weathercase;
-
-  return true;
-}
-
 bool LineAnalyzerDoc::MoveTransmissionLine(const int& index_from,
                                            const int& index_to) {
   // checks indexes
@@ -942,6 +659,51 @@ const TransmissionLine& LineAnalyzerDoc::line() const {
   return *line_active_;
 }
 
+bool LineAnalyzerDoc::set_cables(const std::list<CableFile>& cablefiles) {
+  // saves xml node for transmission lines and clears lines
+  const wxXmlNode* node = SaveTransmissionLinesToXml();
+  lines_.clear();
+
+  // temporarily caches and then replaces existing cables
+  std::list<CableFile> cables_cache = cables_;
+  cables_ = cablefiles;
+
+  // reloads transmission lines from xml node
+  bool status = LoadTransmissionLinesFromXml(node);
+  if (status == false) {
+    // loading lines failed, so resets to starting condition
+    cables_ = cables_cache;
+
+    lines_.clear();
+    LoadTransmissionLinesFromXml(node);
+  }
+
+  return status;
+}
+
+bool LineAnalyzerDoc::set_hardwares(
+    const std::list<HardwareFile>& hardwarefiles) {
+  // saves xml node for transmission lines and clears lines
+  const wxXmlNode* node = SaveTransmissionLinesToXml();
+  lines_.clear();
+
+  // temporarily caches and then replaces existing hardware
+  std::list<HardwareFile> hardwares_cache = hardwares_;
+  hardwares_ = hardwarefiles;
+
+  // reloads transmission lines from xml node
+  bool status = LoadTransmissionLinesFromXml(node);
+  if (status == false) {
+    // loading lines failed, so resets to starting condition
+    hardwares_ = hardwares_cache;
+
+    lines_.clear();
+    LoadTransmissionLinesFromXml(node);
+  }
+
+  return status;
+}
+
 bool LineAnalyzerDoc::set_index_active(const int& index) {
   if (IsValidIndex(index, lines_.size(), false) == true) {
     index_active_ = index;
@@ -950,6 +712,52 @@ bool LineAnalyzerDoc::set_index_active(const int& index) {
   } else {
     return false;
   }
+}
+
+bool LineAnalyzerDoc::set_structures(
+    const std::list<StructureFile>& structurefiles) {
+  // saves xml node for transmission lines and clears lines
+  const wxXmlNode* node = SaveTransmissionLinesToXml();
+  lines_.clear();
+
+  // temporarily caches and then replaces existing structures
+  std::list<StructureFile> structures_cache = structures_;
+  structures_ = structurefiles;
+
+  // reloads transmission lines from xml node
+  bool status = LoadTransmissionLinesFromXml(node);
+  if (status == false) {
+    // loading lines failed, so resets to starting condition
+    structures_ = structures_cache;
+
+    lines_.clear();
+    LoadTransmissionLinesFromXml(node);
+  }
+
+  return status;
+}
+
+bool LineAnalyzerDoc::set_weathercases(
+    const std::list<WeatherLoadCase>& weathercases) {
+  // saves xml node for transmission lines and clears lines
+  const wxXmlNode* node = SaveTransmissionLinesToXml();
+  lines_.clear();
+
+  // temporarily caches and then replaces existing weathercases
+  std::list<WeatherLoadCase> weathercases_cache = weathercases_;
+  weathercases_ = weathercases;
+
+  // reloads transmission lines from xml node
+  bool status = LoadTransmissionLinesFromXml(node);
+  if (status == false) {
+    // loading lines failed, so resets to starting condition
+    weathercases_ = weathercases_cache;
+
+    lines_.clear();
+    LoadTransmissionLinesFromXml(node);
+  }
+
+  return status;
 }
 
 const std::list<StructureFile>& LineAnalyzerDoc::structures() const {
