@@ -346,8 +346,6 @@ class LineAnalyzerDoc : public wxDocument {
                     const bool& is_included_end) const;
 
   /// Updates active transmission line.
-  /// \param[in] index
-  ///   The index.
   void UpdateActiveLineReference();
 
   /// \var cables_

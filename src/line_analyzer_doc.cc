@@ -651,12 +651,12 @@ int LineAnalyzerDoc::index_active() const {
   return index_active_;
 }
 
-const std::list<TransmissionLine>& LineAnalyzerDoc::lines() const {
-  return lines_;
-}
-
 const TransmissionLine& LineAnalyzerDoc::line() const {
   return *line_active_;
+}
+
+const std::list<TransmissionLine>& LineAnalyzerDoc::lines() const {
+  return lines_;
 }
 
 bool LineAnalyzerDoc::set_cables(const std::list<CableFile>& cablefiles) {
