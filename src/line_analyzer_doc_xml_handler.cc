@@ -175,6 +175,7 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
       // gets node for structure file
       wxXmlNode* sub_node = node->GetChildren();
 
+      std::list<StructureFile> structures;
       int index = 0;
       while (sub_node != nullptr) {
         // gets filepath and converts to absolute if needed
@@ -195,7 +196,7 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
 
         // adds to document if no file errors were encountered
         if ((status_node == 0) || (status_node == 1)) {
-          doc.InsertStructureFile(index, structurefile);
+          structures.push_back(structurefile);
         } else {
           message = FileAndLineNumber(filepath, sub_node)
                     + "Invalid structure file. Skipping.";
@@ -206,10 +207,14 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
         index++;
         sub_node = sub_node->GetNext();
       }
+
+      // adds to document
+      doc.set_structures(structures);
     } else if (title == "hardwares") {
       // gets node for hardware file
       wxXmlNode* sub_node = node->GetChildren();
 
+      std::list<HardwareFile> hardwares;
       int index = 0;
       while (sub_node != nullptr) {
         // gets filepath and converts to absolute if needed
@@ -230,7 +235,7 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
 
         // adds to document if no file errors were encountered
         if ((status_node == 0) || (status_node == 1)) {
-          doc.InsertHardwareFile(index, hardwarefile);
+          hardwares.push_back(hardwarefile);
         } else {
           message = FileAndLineNumber(filepath, sub_node)
                     + "Invalid hardware file. Skipping.";
@@ -241,10 +246,14 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
         index++;
         sub_node = sub_node->GetNext();
       }
+
+      // adds to document
+      doc.set_hardwares(hardwares);
     } else if (title == "cables") {
       // gets node for cable file
       wxXmlNode* sub_node = node->GetChildren();
 
+      std::list<CableFile> cables;
       int index = 0;
       while (sub_node != nullptr) {
         // gets filepath and converts to absolute if needed
@@ -264,7 +273,7 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
 
         // adds to document if no file errors were encountered
         if ((status_node == 0) || (status_node == 1)) {
-          doc.InsertCableFile(index, cablefile);
+          cables.push_back(cablefile);
         } else {
           message = FileAndLineNumber(filepath, sub_node)
                     + "Invalid cable file. Skipping.";
@@ -275,10 +284,14 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
         index++;
         sub_node = sub_node->GetNext();
       }
+
+      // adds to document
+      doc.set_cables(cables);
     } else if (title == "weather_load_cases") {
       // gets node for weather load case
       wxXmlNode* sub_node = node->GetChildren();
 
+      std::list<WeatherLoadCase> weathercases;
       int index = 0;
       while (sub_node != nullptr) {
         // creates a weathercase and parses
@@ -291,7 +304,7 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
 
         // adds to document if no file errors were encountered
         if ((status_node == 0) || (status_node == 1)) {
-          doc.InsertWeatherCase(index, weathercase);
+          weathercases.push_back(weathercase);
         } else {
           message = FileAndLineNumber(filepath, sub_node)
                     + "Invalid weathercase. Skipping.";
@@ -302,6 +315,9 @@ bool LineAnalyzerDocXmlHandler::ParseNodeV1(
         index++;
         sub_node = sub_node->GetNext();
       }
+
+      // adds to document
+      doc.set_weathercases(weathercases);
     } else if (title == "transmission_lines") {
       // gets node for weather load case
       wxXmlNode* sub_node = node->GetChildren();
