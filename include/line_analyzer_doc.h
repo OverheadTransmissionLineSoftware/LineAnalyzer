@@ -13,7 +13,8 @@
 
 /// This enum class contains types of update hints.
 enum class HintType {
-  kSharedDataEdit
+  kSharedDataEdit,
+  kTransmissionLineEdit
 };
 
 /// \par OVERVIEW
