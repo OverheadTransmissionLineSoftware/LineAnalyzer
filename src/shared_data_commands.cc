@@ -36,7 +36,9 @@ bool SharedDataCommandBase::Undo() {
   DoModify();
 
   // restores the previous document state for the transmission lines
-  const bool status = doc_->LoadTransmissionLinesFromXml(node_);
+  std::list<TransmissionLine> lines;
+  const bool status = doc_->CreateTransmissionLinesFromXml(node_, lines);
+  doc_->ModifyTransmissionLines(lines);
 
   // posts a view update
   UpdateHint hint(HintType::kSharedDataEdit);

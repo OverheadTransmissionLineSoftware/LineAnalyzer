@@ -117,6 +117,125 @@ void LineAnalyzerDoc::ConvertUnitSystem(const units::UnitSystem& system_from,
   }
 }
 
+bool LineAnalyzerDoc::CreateTransmissionLineFromXml(
+    const wxXmlNode* node,
+    TransmissionLine& line) const {
+  // clears line
+  line = TransmissionLine();
+
+  // creates a list of structure const pointers for parsing
+  std::list<const Structure*> structures;
+  for (auto iter = structures_.cbegin(); iter != structures_.cend(); iter++) {
+    const StructureFile& structurefile = *iter;
+    const Structure* structure = &structurefile.structure;
+    structures.push_back(structure);
+  }
+
+  // creates a list of hardware const pointers for parsing
+  std::list<const Hardware*> hardwares;
+  for (auto iter = hardwares_.cbegin(); iter != hardwares_.cend(); iter++) {
+    const HardwareFile& hardwarefile = *iter;
+    const Hardware* hardware = &hardwarefile.hardware;
+    hardwares.push_back(hardware);
+  }
+
+  // creates a list of cable const pointers for parsing
+  std::list<const Cable*> cables;
+  for (auto iter = cables_.cbegin(); iter != cables_.cend(); iter++) {
+    const CableFile& cablefile = *iter;
+    const Cable* cable = &cablefile.cable;
+    cables.push_back(cable);
+  }
+
+  // creates a list of weathercase const pointers for parsing
+  std::list<const WeatherLoadCase*> weathercases;
+  for (auto iter = weathercases_.cbegin(); iter != weathercases_.cend();
+       iter++) {
+    const WeatherLoadCase* weathercase = &(*iter);
+    weathercases.push_back(weathercase);
+  }
+
+  const bool status_node = TransmissionLineXmlHandler::ParseNode(
+      node, "", &structures, &hardwares, &cables, &weathercases,
+      line);
+  if (status_node == false) {
+    wxString message =
+        TransmissionLineXmlHandler::FileAndLineNumber("", node)
+        + "Invalid transmission line. Skipping.";
+    wxLogError(message);
+  }
+
+  return status_node;
+}
+
+bool LineAnalyzerDoc::CreateTransmissionLinesFromXml(
+    const wxXmlNode* node,
+    std::list<TransmissionLine>& lines) const {
+  // deletes all transmission lines
+  lines.clear();
+
+  // creates a list of structure const pointers for parsing
+  std::list<const Structure*> structures;
+  for (auto iter = structures_.cbegin(); iter != structures_.cend(); iter++) {
+    const StructureFile& structurefile = *iter;
+    const Structure* structure = &structurefile.structure;
+    structures.push_back(structure);
+  }
+
+  // creates a list of hardware const pointers for parsing
+  std::list<const Hardware*> hardwares;
+  for (auto iter = hardwares_.cbegin(); iter != hardwares_.cend(); iter++) {
+    const HardwareFile& hardwarefile = *iter;
+    const Hardware* hardware = &hardwarefile.hardware;
+    hardwares.push_back(hardware);
+  }
+
+  // creates a list of cable const pointers for parsing
+  std::list<const Cable*> cables;
+  for (auto iter = cables_.cbegin(); iter != cables_.cend(); iter++) {
+    const CableFile& cablefile = *iter;
+    const Cable* cable = &cablefile.cable;
+    cables.push_back(cable);
+  }
+
+  // creates a list of weathercase const pointers for parsing
+  std::list<const WeatherLoadCase*> weathercases;
+  for (auto iter = weathercases_.cbegin(); iter != weathercases_.cend();
+       iter++) {
+    const WeatherLoadCase* weathercase = &(*iter);
+    weathercases.push_back(weathercase);
+  }
+
+  // parses all sub-nodes
+  bool status = true;
+  wxXmlNode* sub_node = node->GetChildren();
+  while (sub_node != nullptr) {
+    // creates a transmission line and parses
+    TransmissionLine line;
+    const bool status_node = TransmissionLineXmlHandler::ParseNode(
+        sub_node, "", &structures, &hardwares, &cables, &weathercases,
+        line);
+    if (status_node == false) {
+      status = false;
+    }
+
+    // adds to list if no file errors were encountered
+    if (status_node == true) {
+      lines.push_back(line);
+    } else {
+      wxString message =
+          TransmissionLineXmlHandler::FileAndLineNumber("", sub_node)
+          + "Invalid transmission line. Skipping.";
+      wxLogError(message);
+      status = false;
+    }
+
+    sub_node = sub_node->GetNext();
+  }
+
+  return status;
+}
+
 bool LineAnalyzerDoc::DeleteTransmissionLine(const int& index) {
   // checks index
   if (IsValidIndex(index, lines_.size(), false) == false) {
@@ -437,121 +556,6 @@ wxInputStream& LineAnalyzerDoc::LoadObject(wxInputStream& stream) {
   return stream;
 }
 
-bool LineAnalyzerDoc::LoadTransmissionLineFromXml(const wxXmlNode* node) {
-  // clears active transmission line
-  *line_active_ = TransmissionLine();
-
-  // creates a list of structure const pointers for parsing
-  std::list<const Structure*> structures;
-  for (auto iter = structures_.cbegin(); iter != structures_.cend(); iter++) {
-    const StructureFile& structurefile = *iter;
-    const Structure* structure = &structurefile.structure;
-    structures.push_back(structure);
-  }
-
-  // creates a list of hardware const pointers for parsing
-  std::list<const Hardware*> hardwares;
-  for (auto iter = hardwares_.cbegin(); iter != hardwares_.cend(); iter++) {
-    const HardwareFile& hardwarefile = *iter;
-    const Hardware* hardware = &hardwarefile.hardware;
-    hardwares.push_back(hardware);
-  }
-
-  // creates a list of cable const pointers for parsing
-  std::list<const Cable*> cables;
-  for (auto iter = cables_.cbegin(); iter != cables_.cend(); iter++) {
-    const CableFile& cablefile = *iter;
-    const Cable* cable = &cablefile.cable;
-    cables.push_back(cable);
-  }
-
-  // creates a list of weathercase const pointers for parsing
-  std::list<const WeatherLoadCase*> weathercases;
-  for (auto iter = weathercases_.cbegin(); iter != weathercases_.cend();
-       iter++) {
-    const WeatherLoadCase* weathercase = &(*iter);
-    weathercases.push_back(weathercase);
-  }
-
-  const bool status_node = TransmissionLineXmlHandler::ParseNode(
-      node, "", &structures, &hardwares, &cables, &weathercases,
-      *line_active_);
-  if (status_node == false) {
-    wxString message =
-        TransmissionLineXmlHandler::FileAndLineNumber("", node)
-        + "Invalid transmission line. Skipping.";
-    wxLogError(message);
-  }
-
-  return status_node;
-}
-
-bool LineAnalyzerDoc::LoadTransmissionLinesFromXml(const wxXmlNode* node) {
-  // deletes all transmission lines
-  lines_.clear();
-
-  // creates a list of structure const pointers for parsing
-  std::list<const Structure*> structures;
-  for (auto iter = structures_.cbegin(); iter != structures_.cend(); iter++) {
-    const StructureFile& structurefile = *iter;
-    const Structure* structure = &structurefile.structure;
-    structures.push_back(structure);
-  }
-
-  // creates a list of hardware const pointers for parsing
-  std::list<const Hardware*> hardwares;
-  for (auto iter = hardwares_.cbegin(); iter != hardwares_.cend(); iter++) {
-    const HardwareFile& hardwarefile = *iter;
-    const Hardware* hardware = &hardwarefile.hardware;
-    hardwares.push_back(hardware);
-  }
-
-  // creates a list of cable const pointers for parsing
-  std::list<const Cable*> cables;
-  for (auto iter = cables_.cbegin(); iter != cables_.cend(); iter++) {
-    const CableFile& cablefile = *iter;
-    const Cable* cable = &cablefile.cable;
-    cables.push_back(cable);
-  }
-
-  // creates a list of weathercase const pointers for parsing
-  std::list<const WeatherLoadCase*> weathercases;
-  for (auto iter = weathercases_.cbegin(); iter != weathercases_.cend();
-       iter++) {
-    const WeatherLoadCase* weathercase = &(*iter);
-    weathercases.push_back(weathercase);
-  }
-
-  // parses all sub-nodes
-  bool status = true;
-  wxXmlNode* sub_node = node->GetChildren();
-  while (sub_node != nullptr) {
-    // creates a transmission line and parses
-    TransmissionLine line;
-    const bool status_node = TransmissionLineXmlHandler::ParseNode(
-        sub_node, "", &structures, &hardwares, &cables, &weathercases,
-        line);
-    if (status_node == false) {
-      status = false;
-    }
-
-    // adds to document if no file errors were encountered
-    if (status_node == true) {
-      lines_.push_back(line);
-    } else {
-      wxString message =
-          TransmissionLineXmlHandler::FileAndLineNumber("", sub_node)
-          + "Invalid transmission line. Skipping.";
-      wxLogError(message);
-      status = false;
-    }
-
-    sub_node = sub_node->GetNext();
-  }
-
-  return status;
-}
-
 bool LineAnalyzerDoc::ModifyTransmissionLine(const TransmissionLine& line) {
   *line_active_ = line;
 
@@ -706,13 +710,13 @@ bool LineAnalyzerDoc::set_cables(const std::list<CableFile>& cablefiles) {
   cables_ = cablefiles;
 
   // reloads transmission lines from xml node
-  bool status = LoadTransmissionLinesFromXml(node);
+  bool status = CreateTransmissionLinesFromXml(node, lines_);
   if (status == false) {
     // loading lines failed, so resets to starting condition
     cables_ = cables_cache;
 
     lines_.clear();
-    LoadTransmissionLinesFromXml(node);
+    CreateTransmissionLinesFromXml(node, lines_);
   }
 
   return status;
@@ -729,13 +733,13 @@ bool LineAnalyzerDoc::set_hardwares(
   hardwares_ = hardwarefiles;
 
   // reloads transmission lines from xml node
-  bool status = LoadTransmissionLinesFromXml(node);
+  bool status = CreateTransmissionLinesFromXml(node, lines_);
   if (status == false) {
     // loading lines failed, so resets to starting condition
     hardwares_ = hardwares_cache;
 
     lines_.clear();
-    LoadTransmissionLinesFromXml(node);
+    CreateTransmissionLinesFromXml(node, lines_);
   }
 
   return status;
@@ -762,13 +766,13 @@ bool LineAnalyzerDoc::set_structures(
   structures_ = structurefiles;
 
   // reloads transmission lines from xml node
-  bool status = LoadTransmissionLinesFromXml(node);
+  bool status = CreateTransmissionLinesFromXml(node, lines_);
   if (status == false) {
     // loading lines failed, so resets to starting condition
     structures_ = structures_cache;
 
     lines_.clear();
-    LoadTransmissionLinesFromXml(node);
+    CreateTransmissionLinesFromXml(node, lines_);
   }
 
   return status;
@@ -785,13 +789,13 @@ bool LineAnalyzerDoc::set_weathercases(
   weathercases_ = weathercases;
 
   // reloads transmission lines from xml node
-  bool status = LoadTransmissionLinesFromXml(node);
+  bool status = CreateTransmissionLinesFromXml(node, lines_);
   if (status == false) {
     // loading lines failed, so resets to starting condition
     weathercases_ = weathercases_cache;
 
     lines_.clear();
-    LoadTransmissionLinesFromXml(node);
+    CreateTransmissionLinesFromXml(node, lines_);
   }
 
   return status;

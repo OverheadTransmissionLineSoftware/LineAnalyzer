@@ -112,12 +112,16 @@ class TransmissionLineCommand : public wxCommand {
   bool DoDelete();
 
   /// \brief Does the insert command.
+  /// \param[in] node
+  ///   The node to use when modifying (do/undo).
   /// \return The success status.
-  bool DoInsert();
+  bool DoInsert(const wxXmlNode* node);
 
   /// \brief Does the modify command.
+  /// \param[in] node
+  ///   The node to use when modifying (do/undo).
   /// \return The success status.
-  bool DoModify();
+  bool DoModify(const wxXmlNode* node);
 
   /// \brief Does the move down command.
   /// \return The success status.

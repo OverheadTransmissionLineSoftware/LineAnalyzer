@@ -48,9 +48,9 @@ bool TransmissionLineCommand::Do() {
 
     status = DoDelete();
   } else if (name == kNameInsert) {
-    status = DoInsert();
+    status = DoInsert(node_do_);
   } else if (name == kNameModify) {
-    status = doc_->LoadTransmissionLineFromXml(node_undo_);
+    status = DoModify(node_do_);
   } else if (name == kNameMoveDown) {
     status = DoMoveDown();
   } else if (name == kNameMoveUp) {
@@ -89,9 +89,9 @@ bool TransmissionLineCommand::Undo() {
   } else if (name == kNameDelete) {
     status = DoDelete();
   } else if (name == kNameInsert) {
-    status = DoInsert();
+    status = DoInsert(node_undo_);
   } else if (name == kNameModify) {
-    doc_->LoadTransmissionLinesFromXml(node_undo_);
+    status = DoModify(node_undo_);
   } else if (name == kNameMoveDown) {
     status = DoMoveDown();
   } else if (name == kNameMoveUp) {
@@ -160,26 +160,37 @@ bool TransmissionLineCommand::DoDelete() {
   return doc_->DeleteTransmissionLine(index_);
 }
 
-bool TransmissionLineCommand::DoInsert() {
+bool TransmissionLineCommand::DoInsert(const wxXmlNode* node) {
   // checks index
   if (doc_->IsValidIndex(index_, doc_->lines().size(), true) == false) {
     wxLogError("Invalid index. Aborting insert command.");
     return false;
   }
 
-  /// \todo implement this
-  return true;
+  // inserts into document
+  TransmissionLine line;
+  bool status = doc_->CreateTransmissionLineFromXml(node, line);
+  if (status == false) {
+    return false;
+  } else {
+    return doc_->InsertTransmissionLine(index_, line);
+  }
 }
 
-bool TransmissionLineCommand::DoModify() {
+bool TransmissionLineCommand::DoModify(const wxXmlNode* node) {
   // checks index
   if (doc_->IsValidIndex(index_, doc_->lines().size(), true) == false) {
-    wxLogError("Invalid index. Aborting insert command.");
+    wxLogError("Invalid index. Aborting modify command.");
     return false;
   }
 
-  /// \todo implement this
-  return true;
+  TransmissionLine line;
+  bool status = doc_->CreateTransmissionLineFromXml(node, line);
+  if (status == false) {
+    return false;
+  } else {
+    return doc_->ModifyTransmissionLine(line);
+  }
 }
 
 bool TransmissionLineCommand::DoMoveDown() {
