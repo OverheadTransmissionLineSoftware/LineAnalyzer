@@ -251,6 +251,14 @@ class LineAnalyzerDoc : public wxDocument {
   /// \return Success status.
   bool ModifyTransmissionLine(const TransmissionLine& line);
 
+  /// \brief Modifies the active transmission line.
+  /// \param[in] lines
+  ///   The transmission lines.
+  /// \return Success status.
+  /// If the active transmission line is not valid after these transmission lines
+  /// are added to the document, it is reset to the first line (0).
+  bool ModifyTransmissionLines(const std::list<TransmissionLine>& lines);
+
   /// \brief Moves the transmission line within the list.
   /// \param[in] index_from
   ///   The index item to move.

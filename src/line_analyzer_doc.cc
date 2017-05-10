@@ -558,6 +558,25 @@ bool LineAnalyzerDoc::ModifyTransmissionLine(const TransmissionLine& line) {
   return true;
 }
 
+bool LineAnalyzerDoc::ModifyTransmissionLines(
+    const std::list<TransmissionLine>& lines) {
+  // commits new lines to document
+  lines_ = lines;
+
+  // checks that at least one line exists
+  if (lines_.size() == 0) {
+    TransmissionLine line;
+    lines_.push_back(line);
+  }
+
+  // checks for valid active index
+  if (IsValidIndex(index_active_, lines_.size(), false) == false) {
+    index_active_ = 0;
+  }
+
+  return true;
+}
+
 bool LineAnalyzerDoc::MoveTransmissionLine(const int& index_from,
                                            const int& index_to) {
   // checks indexes
