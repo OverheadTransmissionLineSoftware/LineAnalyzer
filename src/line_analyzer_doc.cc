@@ -301,6 +301,18 @@ bool LineAnalyzerDoc::IsReferencedWeatherCase(const int& index) const {
   return false;
 }
 
+bool LineAnalyzerDoc::IsValidIndex(const int& index,
+                                   const int& size,
+                                   const bool& is_included_end) const {
+  if ((0 <= index) && (index < size)) {
+    return true;
+  } else if ((index == size) && (is_included_end == true)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 wxInputStream& LineAnalyzerDoc::LoadObject(wxInputStream& stream) {
   wxBusyCursor cursor;
 
@@ -792,18 +804,6 @@ bool LineAnalyzerDoc::IsUniqueWeathercaseName(const std::string& name,
   }
 
   return true;
-}
-
-bool LineAnalyzerDoc::IsValidIndex(const int& index,
-                                   const int& size,
-                                   const bool& is_included_end) const {
-  if ((0 <= index) && (index < size)) {
-    return true;
-  } else if ((index == size) && (is_included_end == true)) {
-    return true;
-  } else {
-    return false;
-  }
 }
 
 void LineAnalyzerDoc::UpdateActiveLineReference() {
